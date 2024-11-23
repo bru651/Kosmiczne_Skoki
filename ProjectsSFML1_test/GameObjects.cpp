@@ -49,6 +49,7 @@ MovingCircle::MovingCircle(float radius, float angle, float speed, float size, s
         return velocity;
     }
 
+    // Clicked?
     bool MovingCircle::isClicked(sf::Vector2f mousePosition) {
         float dist = std::hypot(mousePosition.x - shape.getPosition().x, mousePosition.y - shape.getPosition().y);
         return dist <= shape.getRadius();
@@ -62,7 +63,7 @@ MovingCircle::MovingCircle(float radius, float angle, float speed, float size, s
         shape.setFillColor(sf::Color::Blue);
         shape.setOrigin(5.f, 5.f); // Center the shape
         shape.setPosition(position);
-
+        // Flame graphics
         flame.setRadius(2.5f);
         flame.setFillColor(sf::Color::Red);
         flame.setOrigin(flame.getRadius(), flame.getRadius());
