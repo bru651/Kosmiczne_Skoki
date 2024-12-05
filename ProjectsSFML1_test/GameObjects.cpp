@@ -3,8 +3,8 @@
 #include <vector>
 #include "GameObjects.h"
 
-MovingCircle::MovingCircle(float radius, float angle, float speed, float size, sf::Color color, float mass)
-        : radius(radius), angle(angle), speed(speed), mass(mass), size(size) {
+MovingCircle::MovingCircle(float radius, float angle, float speed, float size, sf::Color color, float mass, int id)
+        : radius(radius), angle(angle), speed(speed), mass(mass), size(size), id(id) {
         shape.setRadius(size);
         shape.setFillColor(color);
         shape.setOrigin(size, size);  // Set origin to center
@@ -56,13 +56,13 @@ MovingCircle::MovingCircle(float radius, float angle, float speed, float size, s
     }
 
 
-
-    Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity)
-        : position(startX, startY), velocity(initVelocity), acceleration(0.f, 0.f), tiltAngle(0.0f), mass(mass), ID(ID), thrustPower(4.f){
+    Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& associatedMission)
+        : position(startX, startY), velocity(initVelocity), acceleration(0.f, 0.f), tiltAngle(0.0f), mass(mass), ID(ID), thrustPower(4.f), associatedMission(associatedMission) {
         shape.setRadius(5.f);
         shape.setFillColor(sf::Color::Blue);
         shape.setOrigin(5.f, 5.f); // Center the shape
         shape.setPosition(position);
+
         // Flame graphics
         flame.setRadius(2.5f);
         flame.setFillColor(sf::Color::Red);
