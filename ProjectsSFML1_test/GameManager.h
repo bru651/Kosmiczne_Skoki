@@ -46,6 +46,7 @@ private:
     sf::RectangleShape uiPanel;
     std::vector<std::unique_ptr<sf::Text>> missionTexts; // Dynamic allocation
     std::vector<std::unique_ptr<sf::RectangleShape>> startButtons;
+    std::vector<std::unique_ptr<sf::Sprite>> payloadIcons; // Add icons for mission payloads
 
     void handleInput();         // Keyboard and mouse input
     void updateGame(float deltaTime);   // Updades everything

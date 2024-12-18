@@ -14,6 +14,32 @@ sf::Image sputnik;
 sf::Image telescope;
 sf::Image money;
 
+// Variable to track the number of completed missions
+int completedMissions = 0;
+
+// Function to check if a payload is unlocked based on completed missions
+bool isPayloadUnlocked(const payload& p) {
+    switch (p.id) {
+    case 5:
+        return true;  // Always available
+    case 3:
+        return true;  // Always available
+    case 6:
+        return completedMissions >= 3;  // Unlocked after 3 missions
+    case 2:
+        return completedMissions >= 3;  // Unlocked after 3 missions
+    case 4:
+        return completedMissions >= 5;  // Unlocked after 5 missions
+    case 0:
+        return completedMissions >= 5;  // Unlocked after 5 missions
+    case 1:
+        return completedMissions >= 7;  // Unlocked after 7 missions
+    default:
+        return false;  // If unknown payload, not unlocked
+    }
+}
+
+
 // Load images from files
 void loadImages() {
     std::cout << "Loading images" << std::endl;
@@ -46,6 +72,7 @@ void loadImages() {
 
 // Function to generate a random mission
 mission generateRandomMission(int uniqueId) {
+    loadImages();
     // Define the payloads
     std::cout << "Func: generateRandomMission" << std::endl;
     payload carP(0, 1, car, 1000, 2000, "Moon vehicle");
@@ -59,17 +86,25 @@ mission generateRandomMission(int uniqueId) {
     // Store payloads in a vector
     std::vector<payload> payloads = { carP, elonP, roverP, sateliteP, stationP, sputnikP, telescopeP };
 
+    // Create a vector to store unlocked payloads
+    std::vector<payload> unlockedPayloads;
+
+    // Check which payloads are unlocked
+    for (const auto& p : payloads) {
+        if (isPayloadUnlocked(p)) {
+            unlockedPayloads.push_back(p);
+        }
+    }
+
     // Generate a random index for payload
-    int payloadIndex = std::rand() % payloads.size();
+    int payloadIndex = std::rand() % unlockedPayloads.size();
 
     // Generate a random destination between 1 and 5
     int randomDestination = 1 + std::rand() % 5;
 
     // Select random payload and destination
-    payload randomPayload = payloads[payloadIndex];
+    payload randomPayload = unlockedPayloads[payloadIndex];
 
     // Create and return a new mission
     return mission(uniqueId, randomPayload, randomDestination);
 }
-
-

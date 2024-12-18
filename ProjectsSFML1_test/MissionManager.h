@@ -37,3 +37,5 @@ public:
 };
 
 mission generateRandomMission(int);
+
+extern int completedMissions;

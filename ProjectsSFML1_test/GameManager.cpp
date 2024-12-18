@@ -42,17 +42,29 @@ void GameManager::generateMissions() {
     // Seed the random number generator
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
     std::cout << "Func: generateMissions" << std::endl;
+    // Clear existing UI elements
+    missions.clear();          // Remove old missions
     missionTexts.clear();
     startButtons.clear();
+    payloadIcons.clear();
+
+    // Generate missions
     for (int i = 0; i < 4; ++i) {
         missions.push_back(generateRandomMission(i + 1));
     }
 
-    // Create UI elements for missions
-    missionTexts.clear();
-    startButtons.clear();
-
     for (size_t i = 0; i < missions.size(); ++i) {
+        // Map destination ID to planet name
+        std::string destinationName;
+        switch (missions[i].destination) {
+        case 1: destinationName = "Mercury"; break;
+        case 2: destinationName = "Venus"; break;
+        case 3: destinationName = "Earth"; break;
+        case 4: destinationName = "Mars"; break;
+        case 5: destinationName = "Jupiter"; break;
+        default: destinationName = "Sosnowiec"; break; // Fallback for unexpected values
+        }
+
         // Mission text
         auto text = std::make_unique<sf::Text>();
         text->setFont(font);
@@ -64,17 +76,28 @@ void GameManager::generateMissions() {
             "Mass: " + std::to_string(missions[i].missionPayload.mass) + "\n" +
             "Cost: " + std::to_string(missions[i].missionPayload.cost) + "\n" +
             "Reward: " + std::to_string(missions[i].missionPayload.reward) + "\n" +
-            "Destination: " + std::to_string(missions[i].destination)
+            "Destination: " + destinationName
         );
         text->setPosition(580, 260 + i * 140); // Adjust position for each mission
         missionTexts.push_back(std::move(text));
 
-        // Start button
+        // Start button and payload icon logic
         auto button = std::make_unique<sf::RectangleShape>(sf::Vector2f(100, 40));
         button->setFillColor(sf::Color::Green);
         button->setPosition(1260, 260 + i * 140);
         startButtons.push_back(std::move(button));
-   }
+
+        auto sprite = std::make_unique<sf::Sprite>();
+        sf::Texture* texture = new sf::Texture();
+        if (!texture->loadFromImage(missions[i].missionPayload.icon)) {
+            throw std::runtime_error("Failed to load payload icon texture");
+        }
+        sprite->setTexture(*texture);
+        sprite->setPosition(800, 260 + i * 140); // Adjust position for icon
+        sprite->setScale(0.2f, 0.2f);            // Scale down the icon
+        payloadIcons.push_back(std::move(sprite));
+    }
+
 }
 
 
@@ -164,10 +187,15 @@ void GameManager::handleInput() {
                 std::cout << "Input: Esc" << std::endl;
                 window.close();
             }
-            if (event.key.code == sf::Keyboard::M) {        // Toggle UI visibility
+            if (event.key.code == sf::Keyboard::M) { // Toggle mission UI
                 std::cout << "Input: M" << std::endl;
                 tracker.uiVisible = !tracker.uiVisible;
-            } 
+
+                // Generate new missions when UI is toggled on
+                if (tracker.uiVisible) {
+                    generateMissions();
+                }
+            }
             if (event.key.code == sf::Keyboard::H) {        // Toggle help UI visibility
                 std::cout << "Input: H" << std::endl;
                 tracker.uiHelpVisible = !tracker.uiHelpVisible;
@@ -288,8 +316,6 @@ void GameManager::renderGame() {
             dot.setPosition(tracker.lineStart + direction * i);
             window.draw(dot);
         }
-
-        
     }
 
     // Render UI if visible
@@ -394,12 +420,12 @@ void GameManager::checkMissionCompletionSingular(Rocket& rocket, MovingCircle& c
         playerMoney += rocket.associatedMission.missionPayload.reward;
         std::cout << "Mission completed! Reward: " << rocket.associatedMission.missionPayload.reward
             << " Remaining money: " << playerMoney << "\n";
+        completedMissions++;
     }
 }
 
 
 void GameManager::renderUI() {
-    //std::cout << "Func: renderUI" << std::endl;
     window.draw(uiPanel);
 
     sf::Text moneyText;
@@ -410,17 +436,20 @@ void GameManager::renderUI() {
     moneyText.setPosition(580, 200);
     window.draw(moneyText);
 
-    // Draw mission texts
-    for (const auto& text : missionTexts) {
-        if (text) {
-            window.draw(*text); // Safely dereference
+    // Draw mission texts and payload icons
+    for (size_t i = 0; i < missionTexts.size(); ++i) {
+        if (missionTexts[i]) {
+            window.draw(*missionTexts[i]);
+        }
+        if (payloadIcons[i]) {
+            window.draw(*payloadIcons[i]); // Draw the icon
         }
     }
 
     // Draw buttons
     for (const auto& button : startButtons) {
         if (button) {
-            window.draw(*button); // Safely dereference
+            window.draw(*button);
         }
     }
 }
