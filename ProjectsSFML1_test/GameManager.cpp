@@ -6,9 +6,12 @@
 #include <cmath>
 
 GameManager::GameManager()
-    : window(sf::VideoMode(1920, 1080), "Skoki prototyp", sf::Style::Fullscreen),
-    center(1920 / 2, 1080 / 2) {
+    : window(sf::VideoMode(Resolution.x, Resolution.y), "Skoki prototyp", sf::Style::Fullscreen),
+    center(0.f, 0.f),
+    view(sf::FloatRect(0, 0, Resolution.x, Resolution.y)),
+    Guiview(sf::FloatRect(0, 0, Resolution.x, Resolution.y)) {
     window.setFramerateLimit(60);
+    view.setCenter(cameraPosition);
     int circleID = 1;
 
     // Initialize circles
@@ -111,6 +114,7 @@ void GameManager::handleInput() {
         else if (event.type == sf::Event::MouseButtonPressed) { // Mouse button
             std::cout << "Input: click" << std::endl;
             sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+            sf::Vector2f mouseCamPos = GetCameraMousePosition(mousePos);
             if (event.mouseButton.button == sf::Mouse::Left) {  // Left click
                 tracker.planetClick = false;
 
@@ -124,7 +128,7 @@ void GameManager::handleInput() {
 
                 // Check planet clicks
                 for (auto& planet : circles) {
-                    if (planet.isClicked(mousePos)) { // Clicked planet spawns rocket
+                    if (planet.isClicked(mouseCamPos)) { // Clicked planet spawns rocket
                         tracker.planetClick = true;
                         sf::Vector2f linearVelocity = planet.getLinearVelocity(center);
                         sf::Vector2f spawnPosition = planet.shape.getPosition() +
@@ -149,8 +153,8 @@ void GameManager::handleInput() {
                     float minDistance = 15;
                     for (const auto& rocket : rockets) {
                         float distance = std::hypot(
-                            rocket.shape.getPosition().x - mousePos.x,
-                            rocket.shape.getPosition().y - mousePos.y
+                            rocket.position.x - mouseCamPos.x,
+                            rocket.position.y - mouseCamPos.y
                         );
                         if (distance < minDistance) {   //Closest rocked within minimal distance gets tracked
                             tracker.rockedComand = rocket.ID;
@@ -201,6 +205,50 @@ void GameManager::handleInput() {
                 tracker.uiHelpVisible = !tracker.uiHelpVisible;
             }
         }
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        cameraPosition.y -= CameraSpeed;
+        view.setCenter(cameraPosition);
+        //std::cout << "W" <<std::endl;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    {
+        cameraPosition.y += CameraSpeed;
+        view.setCenter(cameraPosition);
+        //std::cout << "S" << std::endl;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+        cameraPosition.x -= CameraSpeed;
+        view.setCenter(cameraPosition);
+        //std::cout << "A" << std::endl;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+        cameraPosition.x += CameraSpeed;
+        view.setCenter(cameraPosition);
+        //std::cout << "D" << std::endl;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    {
+        Zoom += 0.05;
+        if (Zoom > 10)
+        {
+            Zoom = 10;
+        }
+        view.setSize(sf::Vector2f(Resolution.x / Zoom, Resolution.y / Zoom));
+        CameraSpeed = BaseCameraSpeed / Zoom;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))// Zoom down
+    {
+        Zoom -= 0.05;
+        if (Zoom < 0.1)
+        {
+            Zoom = 0.1;
+        }
+        view.setSize(sf::Vector2f(Resolution.x / Zoom, Resolution.y / Zoom));
+        CameraSpeed = BaseCameraSpeed / Zoom;
     }
 }
 
@@ -300,6 +348,8 @@ void GameManager::renderGame() {
         explosion.draw(window);
     }
 
+    window.setView(Guiview);
+
     if (tracker.dragging) {     // If dragging control line
         sf::Vector2f endPosition = sf::Vector2f(sf::Mouse::getPosition(window));
         //sf::Vector2f endPosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -326,7 +376,7 @@ void GameManager::renderGame() {
     if (tracker.uiHelpVisible) {
         renderUI_Help();
     }
-
+    window.setView(view);
     window.display();
 }
 
@@ -467,7 +517,9 @@ void GameManager::renderUI_Help() {
         "Press 'Escape' to exit game\n"
         "Deliver rocket to assigned planet to recive funds\n"
         "Left click to select rocket to control\n"
-        "Right click to control rocket");
+        "Right click to control rocket\n"
+        "Use WSAD for camera movement\n"
+        "Zoom using UP and DOWN arrow keys");
     text.setCharacterSize(35);
     text.setFillColor(sf::Color::White);
     text.setPosition(580, 250);
@@ -483,4 +535,12 @@ void  GameManager::checkIncome() {
         inc += circle.buildings.size() * bval;
     }
     income = inc;
+}
+
+sf::Vector2f GameManager::GetCameraMousePosition(const sf::Vector2f mousePosition) {
+    // Convert mouse position to world coordinates considering the view
+    sf::Vector2f worldPosition = window.mapPixelToCoords(
+        static_cast<sf::Vector2i>(mousePosition), view
+    );
+    return worldPosition;
 }

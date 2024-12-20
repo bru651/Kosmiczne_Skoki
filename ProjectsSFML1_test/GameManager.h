@@ -24,6 +24,15 @@ public:
 class GameManager {
 private:
     sf::RenderWindow window;        // Graphical window
+    sf::Vector2f Resolution = sf::Vector2f(1920, 1080);
+    sf::Vector2f cameraPosition = sf::Vector2f(0.f, 0.f); // Initialize to (0,0)
+    float Zoom = 1.f;
+    float BaseCameraSpeed = 10.f;
+    float CameraSpeed = BaseCameraSpeed;
+    sf::View view;
+    sf::View Guiview;
+
+
     sf::Vector2f center;            // Planets orbit this point
     std::vector<MovingCircle> circles;  // Contains planets and the sun
     std::vector<Rocket> rockets;        // Contains rockets
@@ -53,6 +62,8 @@ private:
     void renderGame();          // Draws everything
     void renderUI(); // Render the mission UI
     void renderUI_Help(); // Render the help UI
+    sf::Vector2f GetCameraMousePosition(const sf::Vector2f mousePosition);
+
 
     void generateMissions(); // Generate missions
     void handleMissionStart(int missionIndex); // Start a mission
