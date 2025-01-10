@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 
+std::map<std::string, sf::Texture> textures; // Store textures
+
 GameManager::GameManager()
     : window(sf::VideoMode(Resolution.x, Resolution.y), "Skoki prototyp", sf::Style::Fullscreen),
     center(0.f, 0.f),
@@ -14,18 +16,31 @@ GameManager::GameManager()
     view.setCenter(cameraPosition);
     int circleID = 1;
 
-    // Initialize circles
+    // Load textures
+    std::vector<std::string> textureFiles = { "pixelarty/kerbol.png", "pixelarty/moho.png","pixelarty/eve.png","pixelarty/kerbin.png" ,"pixelarty/duna.png", "pixelarty/jool.png" };
+    for (const auto& file : textureFiles) {
+        sf::Texture texture;
+        if (!texture.loadFromFile(file)) {
+            throw std::runtime_error("Failed to load " + file);
+        }
+        textures[file] = texture;
+    }
+
+    // Initialize planets
     for (int i = 0; i < 5; ++i) {
         float radius = 100 + i * 85;
         float angle = i;
         float speed = 50.0f / radius;
         float size = 25.0f + i * 2.0f;
         float mass = size * size;
-        circles.emplace_back(radius, angle, speed, size, sf::Color::Green, mass, circleID++, 1);
+        std::string textureFile = textureFiles[i % textureFiles.size()+1];
+        circles.emplace_back(radius, angle, speed, size, textureFile, mass, circleID++, 1);
+        circles.back().sprite.setTexture(textures[textureFile]); // Set the preloaded texture
     }
 
     // Add Sun
-    circles.emplace_back(0, 0, 0.0f, 35, sf::Color::Yellow, 35 * 35, 0, 0);
+    circles.emplace_back(0, 0, 0.0f, 35, "pixelarty/kerbol.png", 35 * 35, 0, 0);
+    circles.back().sprite.setTexture(textures["pixelarty/kerbol.png"]);
 
     // Load font
     if (!font.loadFromFile("arial.ttf")) {

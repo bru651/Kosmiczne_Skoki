@@ -39,9 +39,11 @@ public:
     float size;     // Size of the planet
     int id;         // Id of the planet
     bool walkable;  // Can it have buildings
+    sf::Texture texture;
+    sf::Sprite sprite;
     sf::Vector2f position = sf::Vector2f(0, 0);
 
-    MovingCircle(float radius, float angle, float speed, float size, sf::Color color, float mass, int id, bool walkable);  //Constructor
+    MovingCircle(float radius, float angle, float speed, float size, const std::string& textureFile, float mass, int id, bool walkable);  //Constructor
     void update(float deltaTime, const sf::Vector2f& center); // Updates planets position based on time and point its orbiting
     void draw(sf::RenderWindow& window) const;  // Draws planets graphic
     sf::Vector2f calculateGravityForce(const sf::Vector2f& point) const; // Calculate planets gravity on specified point 
