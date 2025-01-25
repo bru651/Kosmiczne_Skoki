@@ -23,12 +23,13 @@ GameManager::GameManager()
         if (!texture.loadFromFile(file)) {
             throw std::runtime_error("Failed to load " + file);
         }
+        texture.setSmooth(true);
         textures[file] = texture;
     }
 
     // Initialize planets
     for (int i = 0; i < 5; ++i) {
-        float radius = 100 + i * 85;
+        float radius = 150 + i * 125;
         float angle = i;
         float speed = 50.0f / radius;
         float size = 25.0f + i * 2.0f;
@@ -39,9 +40,31 @@ GameManager::GameManager()
     }
 
     // Add Sun
-    circles.emplace_back(0, 0, 0.0f, 35, "pixelarty/kerbol.png", 35 * 35, 0, 0);
+    circles.emplace_back(0, 0, 0.0f, 45, "pixelarty/kerbol.png", 35 * 35, 0, 0);
     circles.back().sprite.setTexture(textures["pixelarty/kerbol.png"]);
+    
+    // Load textures for rockets and flames
+    std::vector<std::string> rocketTextureFiles = { "pixelarty/rakieta.png", "pixelarty/engine_fire.png" };
+    for (const auto& file : rocketTextureFiles) {
+        sf::Texture texture;
+        if (!texture.loadFromFile(file)) {
+            throw std::runtime_error("Failed to load " + file);
+        }
+        rocketTextures[file] = texture;
+    }
 
+    // Load textures for payloads
+    std::vector<std::string> payloadTextureFiles = { "pixelarty/apolloCarThing.png", "pixelarty/elonRocket.png",
+    "pixelarty/rover.png", "pixelarty/satelite.png", "pixelarty/spaceStation.png" ,"pixelarty/sputnik.png", 
+    "pixelarty/telescope.png", "pixelarty/stonk.png"};
+    for (const auto& file : payloadTextureFiles) {
+        sf::Texture texture;
+        if (!texture.loadFromFile(file)) {
+            throw std::runtime_error("Failed to load " + file);
+        }
+        payloadTextures[file] = texture;
+    }
+    
     // Load font
     if (!font.loadFromFile("arial.ttf")) {
         throw std::runtime_error("Failed to load font");
@@ -151,11 +174,11 @@ void GameManager::handleInput() {
 
                         // Create a default mission for the rocket
                         mission defaultMission(tracker.rockedID,
-                            payload(0, 1, sf::Image(), 0, 0, "Default Payload"),
+                            payload(0, 1, sf::Image(), 0, 0, "Default Payload", "pixelarty/stonk.png"),
                             0); // No destination set
 
                         // Spawn the rocket with the default mission
-                        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 1.f, tracker.rockedID, linearVelocity, defaultMission);
+                        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 1.f, tracker.rockedID, linearVelocity, defaultMission, rocketTextures["pixelarty/rakieta.png"], rocketTextures["pixelarty/engine_fire.png"]);
                         tracker.rockedID++; // Iterate ID
                         break;
                     }
@@ -191,6 +214,9 @@ void GameManager::handleInput() {
                             rocket.thrustMultiplier = (distance - controlMin)/controlMax;
                             rocket.thrustMultiplier = std::min(std::max(rocket.thrustMultiplier, 0.f), 1.f);
                             rocket.setTiltAngle(tracker.lineStart, lineEnd);
+                            rocket.rocketSprite.setRotation(rocket.tiltAngle * 180.0f / 3.14159 - 90.f);
+                            rocket.flameSprite.setRotation(rocket.tiltAngle * 180.0f / 3.14159 - 90.f);
+                            rocket.flameSprite.setPosition(rocket.position + sf::Vector2f(std::cos(rocket.tiltAngle), std::sin(rocket.tiltAngle)) * 10.f);
                         }
                     }
                 }
@@ -218,6 +244,10 @@ void GameManager::handleInput() {
             if (event.key.code == sf::Keyboard::H) {        // Toggle help UI visibility
                 std::cout << "Input: H" << std::endl;
                 tracker.uiHelpVisible = !tracker.uiHelpVisible;
+            }
+            if (event.key.code == sf::Keyboard::I) {        // Toggle help devinfo visibility
+                std::cout << "Input: I" << std::endl;
+                tracker.devinfo = !tracker.devinfo;
             }
         }
     }
@@ -349,13 +379,13 @@ void GameManager::renderGame() {
             tracker.rocketAlive = 1;
             tracker.destinationTracker = rocket.associatedMission.destination;
         }
-        rocket.draw(window);
+        rocket.draw(window, tracker.devinfo);
     }
 
     for (const auto& circle : circles) { // Draw planets and the sun
        if ((tracker.rocketAlive == 1) && (circle.id == tracker.destinationTracker)) {
            GraphicalEffects::drawDottedCircle(window, circle.position, circle.size + 20, 12.f, 3.f, sf::Color::Magenta); }
-        circle.draw(window);
+        circle.draw(window, tracker.devinfo);
     }
 
 
@@ -434,7 +464,7 @@ void GameManager::handleMissionStart(int missionIndex) {
 
     // Ensure mission is valid
     if (!selectedMission.missionPayload.name.empty()) {
-        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 1.f + selectedMission.missionPayload.mass, tracker.rockedID++, linearVelocity, selectedMission);
+        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 1.f + selectedMission.missionPayload.mass, tracker.rockedID++, linearVelocity, selectedMission, rocketTextures["pixelarty/rakieta.png"], rocketTextures["pixelarty/engine_fire.png"]);
     }
     else {
         std::cerr << "Mission payload is not valid!\n";
@@ -530,6 +560,7 @@ void GameManager::renderUI_Help() {
         "Press 'M' to toggle mission panel\n"
         "Press 'Space' to toggle pause\n"
         "Press 'Escape' to exit game\n"
+        "Press 'I' to toggle hitcircles\n"
         "Deliver rocket to assigned planet to recive funds\n"
         "Left click to select rocket to control\n"
         "Right click to control rocket\n"

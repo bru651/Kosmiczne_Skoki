@@ -11,6 +11,7 @@ public:
     bool pause = 1;         // Pause
     bool dragging = 0;      // Tells if a if control line is being dragged
     bool planetClick = 0;   // Checks if a planet got clicked
+    bool devinfo = 0;       // Checks if devinfo(hitcircles should be vissible)
     bool uiVisible = false; // UI visibility toggle
     bool uiHelpVisible = 1; // HelpUI visibility toggle
     sf::Vector2f lineStart = sf::Vector2f(0.f, 0.f);    // Start of rocket control line()
@@ -56,6 +57,11 @@ private:
     std::vector<std::unique_ptr<sf::Text>> missionTexts; // Dynamic allocation
     std::vector<std::unique_ptr<sf::RectangleShape>> startButtons;
     std::vector<std::unique_ptr<sf::Sprite>> payloadIcons; // Add icons for mission payloads
+
+    std::map<std::string, sf::Texture> rocketTextures; // Shared textures for rockets and flames
+    std::map<std::string, sf::Texture> payloadTextures; // Shared textures for payloads
+
+    
 
     void handleInput();         // Keyboard and mouse input
     void updateGame(float deltaTime);   // Updades everything

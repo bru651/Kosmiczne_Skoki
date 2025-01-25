@@ -25,13 +25,16 @@ void MovingCircle::update(float deltaTime, const sf::Vector2f& center) {
 }
 
 // Draw the rocket to the window
-void MovingCircle::draw(sf::RenderWindow& window) const {
+void MovingCircle::draw(sf::RenderWindow& window, bool devinfo) const {
+    
+    window.draw(sprite); // Draw the sprite
+
     // Draw all buildings on the planet
     for (const auto& building : buildings) {
         building.draw(window);
     }
-    window.draw(sprite); // Draw the sprite
-    // window.draw(shape); // Optional: for debugging, draw the circle
+
+     if(devinfo) window.draw(shape); // Optional: for debugging, draw the circle
 }
 
 // Calculate G force from planet
@@ -97,17 +100,31 @@ bool MovingCircle::checkAndDestroyBuilding(float collisionAngle, float planetRad
 }
 
 
-Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& associatedMission)
+Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& associatedMission, const sf::Texture& rocketTexture, const sf::Texture& flameTexture)
     : position(startX, startY), velocity(initVelocity), acceleration(0.f, 0.f), tiltAngle(0.0f), mass(mass), ID(ID), thrustPower(10.f), thrustMultiplier(1.f), associatedMission(associatedMission) {
     shape.setRadius(5.f);
     shape.setFillColor(sf::Color::Blue);
     shape.setOrigin(5.f, 5.f); // Center the shape
     shape.setPosition(position);
 
-    // Flame graphics
-    flame.setRadius(2.5f);
-    flame.setFillColor(sf::Color::Red);
-    flame.setOrigin(flame.getRadius(), flame.getRadius());
+    // Initialize rocket sprite
+    rocketSprite.setTexture(rocketTexture);
+    rocketSprite.setOrigin(rocketTexture.getSize().x / 2, rocketTexture.getSize().y / 2);
+    rocketSprite.setScale(0.03f, 0.03f);
+
+    // Initialize flame sprite
+    flameSprite.setTexture(flameTexture);
+    flameSprite.setOrigin(flameTexture.getSize().x / 2, 0); // Align flame with rocket's bottom
+    flameSprite.setScale(0.02f, 0.02f);
+
+    // Update rocket sprite position and rotation
+    rocketSprite.setPosition(position);
+    rocketSprite.setRotation(tiltAngle * 180.0f / 3.14159 - 90.f);
+
+    // Update flame sprite position and rotation
+    flameSprite.setPosition(position);
+    flameSprite.setRotation(tiltAngle * 180.0f / 3.14159 - 90.f);
+
 }
 
 void Rocket::update(float deltaTime, const std::vector<sf::Vector2f>& forces) {
@@ -133,13 +150,15 @@ void Rocket::update(float deltaTime, const std::vector<sf::Vector2f>& forces) {
 
     // Update rocket's position
     shape.setPosition(position);
-    flame.setPosition(position + sf::Vector2f(std::cos(tiltAngle), std::sin(tiltAngle)) * 10.f);
+    rocketSprite.setPosition(position);
+    flameSprite.setPosition(position + sf::Vector2f(std::cos(tiltAngle), std::sin(tiltAngle)) * 10.f);
 }
 
 // Draw the rocket to the window
-void Rocket::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
-    window.draw(flame);
+void Rocket::draw(sf::RenderWindow& window , bool devinfo) const {
+    window.draw(rocketSprite);
+    if(devinfo) window.draw(shape);
+    window.draw(flameSprite);
 }
 void Rocket::setTiltAngle(const sf::Vector2f& start, const sf::Vector2f& target) {
     sf::Vector2f direction = target - start;

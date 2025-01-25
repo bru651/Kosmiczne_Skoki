@@ -45,7 +45,7 @@ public:
 
     MovingCircle(float radius, float angle, float speed, float size, const std::string& textureFile, float mass, int id, bool walkable);  //Constructor
     void update(float deltaTime, const sf::Vector2f& center); // Updates planets position based on time and point its orbiting
-    void draw(sf::RenderWindow& window) const;  // Draws planets graphic
+    void draw(sf::RenderWindow& window, bool devinfo) const;  // Draws planets graphic
     sf::Vector2f calculateGravityForce(const sf::Vector2f& point) const; // Calculate planets gravity on specified point 
     sf::Vector2f getLinearVelocity(sf::Vector2f center);    // Converts angular velocity to linear
     bool isClicked(sf::Vector2f mousePosition); // Determines if planet got clicked
@@ -58,20 +58,22 @@ public:
 class Rocket {
 public:
     sf::CircleShape shape;  // rockets current graphic
+    sf::Sprite rocketSprite;    // Sprite for roket
+    sf::Sprite flameSprite;     // Sprite for exhaust fire
     sf::Vector2f position;  // Position
     sf::Vector2f velocity;  // Velocity
     sf::Vector2f acceleration;  // Last change in velocity(for verlet)
     float tiltAngle;    // wich way the rocked is turned(Radians)
     float mass;     // rockets mass
-    sf::CircleShape flame;  // grapphic for exhaust flame
+    //sf::CircleShape flame;  // grapphic for exhaust flame
     float thrustPower; // Thrust
     float thrustMultiplier; // Thrust
     unsigned int ID;   // Rockets ID
     mission associatedMission;
 
-    Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& mission);
+    Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& mission, const sf::Texture& rocketTexture, const sf::Texture& flameTexture);
     void update(float deltaTime, const std::vector<sf::Vector2f>& forces);  // Updates position and velocity
-    void draw(sf::RenderWindow& window) const;              // Drawing both rocked and flame
+    void draw(sf::RenderWindow& window, bool devinfo) const;              // Drawing both rocked and flame
     void setTiltAngle(const sf::Vector2f& start, const sf::Vector2f& target);   // For rotating the rocked
     bool checkCollision(const sf::CircleShape& circle);     // For colisions with planets
 };

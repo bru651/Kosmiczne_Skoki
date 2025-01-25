@@ -75,13 +75,13 @@ mission generateRandomMission(int uniqueId) {
     loadImages();
     // Define the payloads
     std::cout << "Func: generateRandomMission" << std::endl;
-    payload carP(0, 1, car, 1000, 2000, "Moon vehicle");
-    payload elonP(1, 1, elon, 1000, 2000, "Spaceship");
-    payload roverP(2, 1, rover, 1000, 2000, "Rover");
-    payload sateliteP(3, 1, satelite, 1000, 2000, "Satelite");
-    payload stationP(4, 1, station, 1000, 2000, "Space station");
-    payload sputnikP(5, 1, sputnik, 1000, 2000, "Sputnik");
-    payload telescopeP(6, 1, telescope, 1000, 2000, "Telescope");//TOOD: update masses and money for balance
+    payload carP(0, 1, car, 1000, 2000, "Moon vehicle", "pixelarty/apolloCarThing.png");
+    payload elonP(1, 1, elon, 1000, 2000, "Spaceship", "pixelarty/elonRocket.png");
+    payload roverP(2, 1, rover, 1000, 2000, "Rover", "pixelarty/rover.png");
+    payload sateliteP(3, 1, satelite, 1000, 2000, "Satelite", "pixelarty/satelite.png");
+    payload stationP(4, 1, station, 1000, 2000, "Space station", "pixelarty/spaceStation.png");
+    payload sputnikP(5, 1, sputnik, 1000, 2000, "Sputnik", "pixelarty/sputnik.png");
+    payload telescopeP(6, 1, telescope, 1000, 2000, "Telescope", "pixelarty/telescope.png");//TOOD: update masses and money for balance
 
     // Store payloads in a vector
     std::vector<payload> payloads = { carP, elonP, roverP, sateliteP, stationP, sputnikP, telescopeP };
