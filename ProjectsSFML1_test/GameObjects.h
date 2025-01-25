@@ -11,17 +11,18 @@ class Building {
 public:
     std::string name;       // Name of the building (same as rocket payload)
     float angle;            // Relative angle (in radians) on the planet's surface
+    sf::Sprite buildingSprite;    // Sprite for building
     float size;             // Size
     sf::CircleShape shape;  // Graphical representation of the building
 
     // Constructor
-    Building(const std::string& name, float angle);
+    Building(const std::string& name, float angle, const sf::Texture& texture);
 
     // Update position of the building based on the planet's center and radius
     void updatePosition(const sf::Vector2f& center, float radius);
 
     // Draw the building
-    void draw(sf::RenderWindow& window) const;
+    void draw(sf::RenderWindow& window, bool devinfo) const;
 
     // Calculate the angular width of the building on the planet
     float getAngularWidth(float planetRadius) const;
@@ -49,7 +50,7 @@ public:
     sf::Vector2f calculateGravityForce(const sf::Vector2f& point) const; // Calculate planets gravity on specified point 
     sf::Vector2f getLinearVelocity(sf::Vector2f center);    // Converts angular velocity to linear
     bool isClicked(sf::Vector2f mousePosition); // Determines if planet got clicked
-    void addBuilding(const std::string name, float angle); // Add building
+    void addBuilding(const std::string name, float angle, const sf::Texture& texture); // Add building
     bool checkAndDestroyBuilding(float collisionAngle, float planetRadius); // Remove building
 
 };

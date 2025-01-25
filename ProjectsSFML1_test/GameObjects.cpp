@@ -31,7 +31,7 @@ void MovingCircle::draw(sf::RenderWindow& window, bool devinfo) const {
 
     // Draw all buildings on the planet
     for (const auto& building : buildings) {
-        building.draw(window);
+        building.draw(window, devinfo);
     }
 
      if(devinfo) window.draw(shape); // Optional: for debugging, draw the circle
@@ -71,7 +71,7 @@ bool MovingCircle::isClicked(sf::Vector2f mousePosition) {
 }
 
 // Add building
-void MovingCircle::addBuilding(const std::string name, float angle) {
+void MovingCircle::addBuilding(const std::string name, float angle, const sf::Texture& texture) {
     // Check if a building with the same name already exists
     for (auto& building : buildings) {
         if (building.name == name) {
@@ -80,7 +80,7 @@ void MovingCircle::addBuilding(const std::string name, float angle) {
     }
 
     // Add the new building
-    buildings.emplace_back(name, angle);
+    buildings.emplace_back(name, angle, texture);
 }
 
 bool MovingCircle::checkAndDestroyBuilding(float collisionAngle, float planetRadius) {
@@ -173,11 +173,18 @@ bool Rocket::checkCollision(const sf::CircleShape& circle) {
 
 
 // Constructor
-Building::Building(const std::string& name, float angle)
+Building::Building(const std::string& name, float angle, const sf::Texture& texture)
     : name(name), angle(angle), size(10.f) {
     shape.setRadius(size);            // Pink circle to represent the building
     shape.setFillColor(sf::Color::Magenta);
     shape.setOrigin(shape.getRadius(), shape.getRadius());
+
+    // building sprite
+     // Initialize rocket sprite
+    buildingSprite.setTexture(texture);
+    buildingSprite.setOrigin(texture.getSize().x / 2, texture.getSize().y / 2);
+    buildingSprite.setScale(0.03f, 0.03f);
+    buildingSprite.setRotation((angle * 180.0f / 3.14159 + 90.f));
 }
 
 // Update position of the building based on the planet's center and radius
@@ -185,11 +192,13 @@ void Building::updatePosition(const sf::Vector2f& center, float radius) {
     float x = center.x + std::cos(angle) * radius;
     float y = center.y + std::sin(angle) * radius;
     shape.setPosition(x, y);
+    buildingSprite.setPosition(x, y);
 }
 
 // Draw the building
-void Building::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
+void Building::draw(sf::RenderWindow& window, bool devinfo) const {
+    window.draw(buildingSprite);
+    if(devinfo) window.draw(shape);
 }
 
 // Calculate the angular width of the building on the planet

@@ -347,7 +347,8 @@ void GameManager::updateGame(float deltaTime) {
                     if(!circle.checkAndDestroyBuilding(angle, circle.size)) {
                         // If no building destroyed, add a new one
                         checkMissionCompletionSingular(rockets[i], circle); // Check for completed or failed missions
-                        if (circle.walkable) { circle.addBuilding(rockets[i].associatedMission.missionPayload.name, angle); }
+                        if (circle.walkable) { 
+                            circle.addBuilding(rockets[i].associatedMission.missionPayload.name, angle, payloadTextures[rockets[i].associatedMission.missionPayload.textureLink]); }
                     }
                     else{ explosions.emplace_back(rockets[i].position, 25.f, 1.f, sf::Color::Red); }    // Explosion
                     checkIncome();
