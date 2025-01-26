@@ -18,7 +18,7 @@ GameManager::GameManager()
     int circleID = 1;
 
     // Load textures
-    std::vector<std::string> textureFiles = { "pixelarty/kerbol.png", "pixelarty/moho.png","pixelarty/eve.png","pixelarty/kerbin.png" ,"pixelarty/duna.png", "pixelarty/jool.png" };
+    std::vector<std::string> textureFiles = { "pixelarty/kerbol.png", "pixelarty/moho.png","pixelarty/eve.png","pixelarty/kerbin.png" ,"pixelarty/duna.png", "pixelarty/jool.png", "pixelarty/eelo.png" };
     for (const auto& file : textureFiles) {
         sf::Texture texture;
         if (!texture.loadFromFile(file)) {
@@ -29,7 +29,7 @@ GameManager::GameManager()
     }
 
     // Initialize planets
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         float radius = 250 + i * 225;
         float angle = i;
         float speed = 30.0f / radius;
@@ -104,6 +104,7 @@ void GameManager::generateMissions() {
         case 3: destinationName = "Earth"; break;
         case 4: destinationName = "Mars"; break;
         case 5: destinationName = "Jupiter"; break;
+        case 6: destinationName = "Pluton"; break;
         default: destinationName = "Sosnowiec"; break; // Fallback for unexpected values
         }
 

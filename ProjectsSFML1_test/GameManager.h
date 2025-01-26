@@ -45,7 +45,7 @@ private:
     float controlMin = 25.f;
     float controlMax = 75.f;
 
-    int playerMoney = 2000; // Player starts with 2000 money
+    int playerMoney = 1000; // Player starts with 2000 money
     int income = 0; // Player income
 
     float payduration = 10.f;    // Time between regular time transfers

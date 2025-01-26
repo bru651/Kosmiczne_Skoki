@@ -100,7 +100,7 @@ mission generateRandomMission(int uniqueId) {
     int payloadIndex = std::rand() % unlockedPayloads.size();
 
     // Generate a random destination between 1 and 5
-    int randomDestination = 1 + std::rand() % 5;
+    int randomDestination = 1 + std::rand() % 6;
 
     // Select random payload and destination
     payload randomPayload = unlockedPayloads[payloadIndex];
