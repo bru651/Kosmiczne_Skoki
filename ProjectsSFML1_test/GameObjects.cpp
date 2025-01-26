@@ -46,6 +46,7 @@ sf::Vector2f MovingCircle::calculateGravityForce(const sf::Vector2f& point) cons
     if (distanceSquared == 0) return sf::Vector2f(0.f, 0.f); // Avoid division by zero
 
     float distance = std::sqrt(distanceSquared);
+    distance /= 3;      // Decrese gravity falloff
     float forceMagnitude = (50 * mass) / distanceSquared; // Gravitational force magnitude
 
     // Normalize direction and scale by force magnitude
@@ -55,7 +56,7 @@ sf::Vector2f MovingCircle::calculateGravityForce(const sf::Vector2f& point) cons
 
 // Calculate the linear velocity of the planet
 sf::Vector2f MovingCircle::getLinearVelocity(sf::Vector2f center) {
-    float orbitRadius = std::hypot(center.x - shape.getPosition().x, center.y - shape.getPosition().y);;
+    float orbitRadius = std::hypot(center.x - shape.getPosition().x, center.y - shape.getPosition().y);
     float linearSpeed = speed * orbitRadius;
     sf::Vector2f velocity(
         -linearSpeed * std::sin(angle), // Perpendicular to the orbit (cos(angle + π/2))
@@ -101,7 +102,7 @@ bool MovingCircle::checkAndDestroyBuilding(float collisionAngle, float planetRad
 
 
 Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vector2f initVelocity, const mission& associatedMission, const sf::Texture& rocketTexture, const sf::Texture& flameTexture)
-    : position(startX, startY), velocity(initVelocity), acceleration(0.f, 0.f), tiltAngle(0.0f), mass(mass), ID(ID), thrustPower(10.f), thrustMultiplier(1.f), associatedMission(associatedMission) {
+    : position(startX, startY), velocity(initVelocity), acceleration(0.f, 0.f), tiltAngle(0.0f), mass(mass), ID(ID), thrustPower(35.f), thrustMultiplier(1.f), associatedMission(associatedMission) {
     shape.setRadius(5.f);
     shape.setFillColor(sf::Color::Blue);
     shape.setOrigin(5.f, 5.f); // Center the shape
@@ -115,7 +116,7 @@ Rocket::Rocket(float startX, float startY, float mass, unsigned int ID, sf::Vect
     // Initialize flame sprite
     flameSprite.setTexture(flameTexture);
     flameSprite.setOrigin(flameTexture.getSize().x / 2, 0); // Align flame with rocket's bottom
-    flameSprite.setScale(0.02f, 0.02f);
+    flameSprite.setScale(maxFlameSize, maxFlameSize);
 
     // Update rocket sprite position and rotation
     rocketSprite.setPosition(position);

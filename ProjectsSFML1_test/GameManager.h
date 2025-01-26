@@ -27,7 +27,7 @@ private:
     sf::RenderWindow window;        // Graphical window
     sf::Vector2f Resolution = sf::Vector2f(1920, 1080);
     sf::Vector2f cameraPosition = sf::Vector2f(0.f, 0.f); // Initialize to (0,0)
-    float Zoom = 1.f;
+    float Zoom = 0.5f;
     float BaseCameraSpeed = 10.f;
     float CameraSpeed = BaseCameraSpeed;
     sf::View view;
@@ -75,7 +75,6 @@ private:
     void handleMissionStart(int missionIndex); // Start a mission
 
     // To handle mission completion logic
-    //void checkMissionCompletion(); 
     void checkMissionCompletionSingular(Rocket& rocket, MovingCircle& circle);
     void checkIncome();
 

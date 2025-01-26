@@ -14,6 +14,7 @@ GameManager::GameManager()
     Guiview(sf::FloatRect(0, 0, Resolution.x, Resolution.y)) {
     window.setFramerateLimit(60);
     view.setCenter(cameraPosition);
+    view.setSize(sf::Vector2f(Resolution.x / Zoom, Resolution.y / Zoom));
     int circleID = 1;
 
     // Load textures
@@ -29,9 +30,9 @@ GameManager::GameManager()
 
     // Initialize planets
     for (int i = 0; i < 5; ++i) {
-        float radius = 150 + i * 125;
+        float radius = 250 + i * 225;
         float angle = i;
-        float speed = 50.0f / radius;
+        float speed = 30.0f / radius;
         float size = 25.0f + i * 2.0f;
         float mass = size * size;
         std::string textureFile = textureFiles[i % textureFiles.size()+1];
@@ -40,7 +41,7 @@ GameManager::GameManager()
     }
 
     // Add Sun
-    circles.emplace_back(0, 0, 0.0f, 45, "pixelarty/kerbol.png", 35 * 35, 0, 0);
+    circles.emplace_back(0, 0, 0.0f, 55, "pixelarty/kerbol.png", 55 * 55, 0, 0);
     circles.back().sprite.setTexture(textures["pixelarty/kerbol.png"]);
     
     // Load textures for rockets and flames
@@ -158,14 +159,14 @@ void GameManager::handleInput() {
 
                 // Check if a button is clicked
                 for (size_t i = 0; i < startButtons.size(); ++i) {
-                    if (startButtons[i]->getGlobalBounds().contains(mousePos)) {
+                    if (startButtons[i]->getGlobalBounds().contains(mousePos) && tracker.uiVisible) {
                         handleMissionStart(i);
                         break;
                     }
                 }
 
                 // Check planet clicks
-                for (auto& planet : circles) {
+                /*for (auto& planet : circles) {
                     if (planet.isClicked(mouseCamPos)) { // Clicked planet spawns rocket
                         tracker.planetClick = true;
                         sf::Vector2f linearVelocity = planet.getLinearVelocity(center);
@@ -182,7 +183,7 @@ void GameManager::handleInput() {
                         tracker.rockedID++; // Iterate ID
                         break;
                     }
-                }
+                }//*/
 
 
                 // Check rocket clicks
@@ -213,6 +214,7 @@ void GameManager::handleInput() {
                             float distance = std::hypot(lineEnd.x - tracker.lineStart.x, lineEnd.y - tracker.lineStart.y);
                             rocket.thrustMultiplier = (distance - controlMin)/controlMax;
                             rocket.thrustMultiplier = std::min(std::max(rocket.thrustMultiplier, 0.f), 1.f);
+                            rocket.flameSprite.setScale(rocket.maxFlameSize * rocket.thrustMultiplier, rocket.maxFlameSize * rocket.thrustMultiplier);
                             rocket.setTiltAngle(tracker.lineStart, lineEnd);
                             rocket.rocketSprite.setRotation(rocket.tiltAngle * 180.0f / 3.14159 - 90.f);
                             rocket.flameSprite.setRotation(rocket.tiltAngle * 180.0f / 3.14159 - 90.f);
@@ -327,7 +329,10 @@ void GameManager::updateGame(float deltaTime) {
                 forces.push_back(circle.calculateGravityForce(rockets[i].position));
             }
 
-            
+            /*if (std::hypot(center.x - rockets[i].position.x, center.y - rockets[i].position.y) > 20000.f) {
+                rockets[i].thrustMultiplier = 0.f;
+                rockets[i].flameSprite.setScale(0.f , 0.f);
+            }//*/
 
             rockets[i].update(deltaTime, forces);   // Apply gravity
 
@@ -404,7 +409,7 @@ void GameManager::renderGame() {
 
         GraphicalEffects::drawDottedCircle(window, tracker.lineStart, controlMin, 10.f, 2.f);
 
-        GraphicalEffects::drawDottedCircle(window, tracker.lineStart, controlMax, 10.f, 2.f);
+        GraphicalEffects::drawDottedCircle(window, tracker.lineStart, controlMax + 25.f, 10.f, 2.f);
 
         for (float i = 0; i < distance; i += 10.f) {    // Draw dotted line
             sf::CircleShape dot(2.f);
@@ -465,7 +470,7 @@ void GameManager::handleMissionStart(int missionIndex) {
 
     // Ensure mission is valid
     if (!selectedMission.missionPayload.name.empty()) {
-        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 1.f + selectedMission.missionPayload.mass, tracker.rockedID++, linearVelocity, selectedMission, rocketTextures["pixelarty/rakieta.png"], rocketTextures["pixelarty/engine_fire.png"]);
+        rockets.emplace_back(spawnPosition.x, spawnPosition.y, 5.f + selectedMission.missionPayload.mass, tracker.rockedID++, linearVelocity, selectedMission, rocketTextures["pixelarty/rakieta.png"], rocketTextures["pixelarty/engine_fire.png"]);
     }
     else {
         std::cerr << "Mission payload is not valid!\n";
@@ -480,34 +485,6 @@ void GameManager::handleMissionStart(int missionIndex) {
     missions.erase(missions.begin() + missionIndex);
 }
 
-
-/*void GameManager::checkMissionCompletion() {
-    //std::cout << "Func: checkMissionCompletion" << std::endl;
-    for (size_t i = 0; i < rockets.size();) {
-        Rocket& rocket = rockets[i];
-        bool completed = false;
-        bool collided = false;
-
-        // Check for collision with planets
-        for (const auto& circle : circles) {
-            if (rocket.checkCollision(circle.shape)) {
-                std::cout << "PlanetID:" << circle.id << std::endl;
-                std::cout << "MissionID:" << rocket.associatedMission.destination << std::endl;
-                if (circle.id == rocket.associatedMission.destination) {
-                    // Mission completed
-                    playerMoney += rocket.associatedMission.missionPayload.reward;
-                    std::cout << "Mission completed! Reward: " << rocket.associatedMission.missionPayload.reward
-                        << " Remaining money: " << playerMoney << "\n";
-                    completed = true;
-                }
-                collided = true;
-                break;
-            }
-        }
-
-        i++;
-    }
-}*/
 
 void GameManager::checkMissionCompletionSingular(Rocket& rocket, MovingCircle& circle) {
 

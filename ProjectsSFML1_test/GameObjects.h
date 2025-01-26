@@ -61,6 +61,7 @@ public:
     sf::CircleShape shape;  // rockets current graphic
     sf::Sprite rocketSprite;    // Sprite for roket
     sf::Sprite flameSprite;     // Sprite for exhaust fire
+    float maxFlameSize = 0.02f; // Maximum size flame can have
     sf::Vector2f position;  // Position
     sf::Vector2f velocity;  // Velocity
     sf::Vector2f acceleration;  // Last change in velocity(for verlet)
